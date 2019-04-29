@@ -1,11 +1,13 @@
 ---
 title: "Continuous Development Models for Greenup Phenology"
-author: "Bijan Seyednasrollah"
+author: | 
+  | Bijan Seyednasrollah
+  | http://bnasr.github.io/
+  | bijan.s.nasr@gmail.com
+  
 date: "4/28/2019"
 output:
   pdf_document: default
-  html_document: default
-  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 This document explains how the two-stage and three-stage phenology models are set up and structured. 
+
+---
 
 ## Two-Stage Phenology Model
 The two-stage model is based on only a single transition point: **_Onset_**. And therefore, the two stages are 1) pre-onset and 2) post-onset. Here, I explain the theoretical  framework for a Hierarchical Bayesian model that can simulate the process. 
@@ -52,7 +56,7 @@ Y_{p,y,d} \sim Bernoulli(P_{p,y,d})
 
 where $Y_{p,y,d}$ is the observed phenological stage for pixel *p* in year *y* and day *d*.
 
-
+---
 
 ## Three-Stage Phenology Model
 
@@ -116,10 +120,5 @@ P_{p,y,d,3} = 1
 \end{equation}
 
 where $\kappa_m$ and $\lambda_m$ are the intercept and slope of the transformation for stage *m*.
-
-
-
-
-
 
 ---

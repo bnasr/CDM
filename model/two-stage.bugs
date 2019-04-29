@@ -19,8 +19,8 @@ model
   {
     epsilon[i] ~ dnorm(0, tau)
     mu <- x[i-1,]%*%beta
-    dh <- exp(mu + epsilon)*(1 - h[i-1]/hmax)*(T[i-1] - Tbase)
-    h[i] <- h[i-1] + max(0, dh)
+    dh <- exp(mu + epsilon)*(1 - h[i-1]/hmax)
+    h[i] <- h[i-1] + dh
   }
   
 ## priors
