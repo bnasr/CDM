@@ -1,0 +1,38 @@
+model
+{
+  hmax <- 1
+  
+## development state
+  
+  for(i in 1:n)
+  {
+    Y[i] ~ dbern(P[i])            ## binary outcome
+    logit(P[i]) <- kappa + lambda * h[i] # logit link
+  }
+
+  for (i in HeadNodes)
+  {
+    h[i] <- 0
+  }
+  
+  for (i in MainNodes)
+  {
+    epsilon[i] ~ dnorm(0, tau)
+    mu <- x[i-1,]%*%beta
+    dh <- exp(mu + epsilon)*(1 - h[i-1]/hmax)*(T[i-1] - Tbase)
+    h[i] <- h[i-1] + max(0, dh)
+  }
+  
+## priors
+  tau <- pow(sigma, -2) ## convert stddev to precision
+  sigma ~ dunif(0, 100) # vague prior for sigma
+  
+  kappa ~ dnorm(0,0.00001) # vague prior for kappa
+  lambda ~ dnorm(0,0.00001) # vague prior for lambda
+  for(i in 1:np)
+  {
+    beta[i] ~ dnorm(0, 0.00001)# vague prior for beta
+  }
+  
+}
+
