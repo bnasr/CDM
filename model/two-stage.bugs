@@ -1,6 +1,6 @@
 model
 {
-  hmax <- 1
+  hmax <- 400
   
 ## development state
   
