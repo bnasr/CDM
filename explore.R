@@ -24,6 +24,8 @@ dt[,tmean := (tmax + tmin)/2]
 beta <- c(intercept=.1, tmean = 1, tmin = 0.2, dayl = 0.5)
 sigma <- 0.1
 
+dt <- dt[year!=2000]
+
 X <- dt[,.(intercept, 
           tmean = scale(tmean), 
           tmin = scale(tmin), 
@@ -32,11 +34,33 @@ X <- dt[,.(intercept,
 Y <- dt$onset*1
 
 epsilon <- rnorm(n = nrow(X), mean = 0, sd = sigma)
-h  <- exp(as.matrix(X)%*%beta)+ epsilon
+dt[,dh0:=(exp(as.matrix(X)%*%beta)+ epsilon)]
 
+fun <- function(dh0){
+  h <- 0*dh0
+  for(i in 1:(length(dh0)-1))  h[i+1] <- h[i] + dh0[i]*(1-h[i]/400)
+  h
+}
 
+dt[,h:=fun(dh0),.(year,site)]
 
+dt[site==1,plot(date, h)]
+dt[site==2,plot(date, h)]
+dt[site==3,plot(date, h)]
 
+n <- nrow(dt)
+
+kappa = -10
+lambda = .5
+# plot(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))))
+# plot(rbinom(365, 1, 1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h])))))
+
+p <- 1/(1 + exp(-(kappa + lambda*dt$h)))
+Y <- rbinom(n, 1, p)
+# plot(Y, type = 'l')
+
+library(rjags)
+model <- jags.model(textConnection())
 
 
 
