@@ -17,22 +17,29 @@ model
   
   for (i in MainNodes)
   {
-    epsilon[i] ~ dnorm(0, tau)
-    mu <- x[i-1,]%*%beta
-    dh <- exp(mu + epsilon)*(1 - h[i-1]/hmax)
-    h[i] <- h[i-1] + dh
+    h[i] <- h[i-1] + exp(X[i-1,]%*%beta + epsilon)*(1 - h[i-1]/hmax)
   }
-  
-## priors
+  epsilon ~ dnorm(0, tau)
+
+# priors
   tau <- pow(sigma, -2) ## convert stddev to precision
-  sigma ~ dunif(0, 100) # vague prior for sigma
+  sigma ~ dunif(0, 1) # vague prior for sigma
   
   kappa ~ dnorm(0,0.00001) # vague prior for kappa
-  lambda ~ dnorm(0,0.00001) # vague prior for lambda
-  for(i in 1:np)
-  {
-    beta[i] ~ dnorm(0, 0.00001)# vague prior for beta
-  }
+#  lambda ~ dnorm(0,0.00001) # vague prior for lambda
+#  kappa <- -10
+  lambda <- 0.5
+  
+#  for(i in 1:np)
+#  {
+#    beta[i] ~ dnorm(0, 0.00001)# vague prior for beta
+# }
+
+  beta[1] <-  0.1
+  beta[2] <-  1
+  beta[3] <-  0.2
+  beta[4] <-  0.5
+  
   
 }
 

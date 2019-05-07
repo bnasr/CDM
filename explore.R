@@ -52,6 +52,7 @@ n <- nrow(dt)
 
 kappa = -10
 lambda = .5
+
 # plot(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))))
 # plot(rbinom(365, 1, 1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h])))))
 
@@ -60,7 +61,32 @@ Y <- rbinom(n, 1, p)
 # plot(Y, type = 'l')
 
 library(rjags)
-model <- jags.model(textConnection())
+
+HeadNodes <- which(dt$year==2001)
+MainNodes <- which(dt$year!=2001)
+any(MainNodes%in%HeadNodes)
+
+model <- jags.model(file = 'model/two-stage.bugs', 
+                    data = list(Y = Y, 
+                                X = X,
+                                n = length(n),
+                                np = ncol(X),
+                                HeadNodes = HeadNodes,
+                                MainNodes = MainNodes
+                                ), 
+                    # inits = list(kappa = -10),
+                    n.chains = 4,
+                    n.adapt = 1000,
+                    quiet = FALSE
+                    )
+
+out <- coda.samples(model, 
+             variable.names = c('kappa', 'lambda', 'beta', 'sigma'), 
+             n.iter = 100000)
 
 
+summary(out)
 
+gelman.plot(out)
+
+            
