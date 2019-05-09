@@ -2,16 +2,10 @@ con <- url("http://www4.stat.ncsu.edu/~reich/ABA/Code/gambia.RData")
 
 load(con)
 
-ls()
-
 Y <- pos
 n <- length(Y)
-n
-table(Y)
 X <- as.matrix(X)
-dim(X)
 
-X[1:5,]
 mle <- glm(Y~X,family="binomial")
 summary(mle)
 
@@ -43,4 +37,4 @@ update(model, 10000, progress.bar="none")
 
 samp <- coda.samples(model, 
                      variable.names=c("beta"), 
-                     n.iter=20000, progress.bar="none")
+                     n.iter=100, progress.bar="none")

@@ -62,8 +62,8 @@ Y <- rbinom(n, 1, p)
 
 library(rjags)
 
-HeadNodes <- which(dt$year==2001)
-MainNodes <- which(dt$year!=2001)
+HeadNodes <- which(dt$doy==1)
+MainNodes <- which(dt$doy!=1)
 any(MainNodes%in%HeadNodes)
 
 model <- jags.model(file = 'model/two-stage.bugs', 
@@ -75,18 +75,28 @@ model <- jags.model(file = 'model/two-stage.bugs',
                                 MainNodes = MainNodes
                                 ), 
                     # inits = list(kappa = -10),
-                    n.chains = 4,
-                    n.adapt = 1000,
+                    # n.chains = 4,
+                    # n.adapt = 1000,
                     quiet = FALSE
                     )
 
 out <- coda.samples(model, 
-             variable.names = c('kappa', 'lambda', 'beta', 'sigma'), 
-             n.iter = 100000)
+                    # variable.names = c('kappa', 'lambda', 'beta', 'sigma', 'h'), 
+                    variable.names = c('kappa', 'lambda', 'h'), 
+                    n.iter = 1000)
 
 
-summary(out)
+# summary(out)
+str(out)
+n <- length(dt$h)
+hist(as.numeric(out[[1]][,n+1]))
+hist(as.numeric(out[[1]][,n+2]))
+plot(as.numeric(out[[1]][,n+1]))
+plot(as.numeric(out[[1]][,n+2]))
+plot(apply(out[[1]], 2, mean)[1:n])
+plot(apply(out[[1]], 2, mean)[1:n], dt$h)
 
+abline(0,1, col= 'red')
 gelman.plot(out)
 
             
