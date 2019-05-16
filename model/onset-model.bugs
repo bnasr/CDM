@@ -20,16 +20,12 @@ model
   # observation level
   for(i in 1:n)
   {
-    Y[i] ~ dnorm(
-              step(
-                  h[i] -
-                  h_onset
-                  ), 
-                10000000
-                )
+    Y[i] ~ dbern(p[i])            ## binary outcome
+    
+    logit(p[i]) <- kappa + lambda * h[i] # logit link
   }
 
-  #inv.sigma2 <- pow(sigma, -2) ## convert stddev to precision
+  #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision
 
   
 #  epsilon ~ dnorm(0, tau)
@@ -37,7 +33,8 @@ model
   
   
   # priors for process error
-  #sigma ~ dunif(0, .001) # vague prior for sigma
+  #sigma ~ dunif(0.0099, .0101) # vague prior for sigma
+  #sigma <- 0.01
   
   # priors for beta's
   for(i in 1:np){
