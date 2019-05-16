@@ -1,0 +1,48 @@
+model
+{
+  
+  # development state for head nodes (i.e. start of the driving forces)
+  for (i in HeadNodes)
+  {
+    h[i] <- 0
+  }
+  
+  # development state for main nodes (i.e. all nodes except for the head nodes)
+  for (i in MainNodes)
+  {
+    h[i] <- h[i-1] + 
+                      max(
+                          0,
+                          X[i-1,]%*%beta
+                          )
+  }
+  
+  # observation level
+  for(i in 1:n)
+  {
+    Y[i] ~ dnorm(
+              step(
+                  h[i] -
+                  h_onset
+                  ), 
+                10000000
+                )
+  }
+
+  #inv.sigma2 <- pow(sigma, -2) ## convert stddev to precision
+
+  
+#  epsilon ~ dnorm(0, tau)
+
+  
+  
+  # priors for process error
+  #sigma ~ dunif(0, .001) # vague prior for sigma
+  
+  # priors for beta's
+  for(i in 1:np){
+    beta[i] ~ dnorm(0, 0.001)# vague prior for beta
+  }
+
+}
+
