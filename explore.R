@@ -117,3 +117,19 @@ abline(0,1, col= 'red')
 gelman.plot(out)
 
             
+
+
+
+
+
+
+kappa = 10
+lambda = -1
+x <- seq(1, 400)
+p <- 
+  Y <- rbinom(n, 1, p)
+plot(p)
+library(manipulate)
+manipulate(plot(x, 1/(1 + exp(-(k + l*x))), ylim = c(0,1)), 
+           k=slider(-1000,0, initial = -100),  
+           l=slider(0, 10, step = .01, initial = 1))
