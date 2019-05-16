@@ -52,8 +52,18 @@ n <- nrow(dt)
 
 kappa = -10
 lambda = .5
+plot(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))))
 
-# plot(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))))
+kappa = -20
+lambda = .5
+lines(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))))
+
+
+kappa = -20
+lambda = .1
+lines(1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h]))), col ='red')
+
+
 # plot(rbinom(365, 1, 1/(1 + exp(-(kappa + lambda*dt[site==1&year==2017, h])))))
 
 p <- 1/(1 + exp(-(kappa + lambda*dt$h)))
@@ -89,12 +99,19 @@ out <- coda.samples(model,
 # summary(out)
 str(out)
 n <- length(dt$h)
-hist(as.numeric(out[[1]][,n+1]))
-hist(as.numeric(out[[1]][,n+2]))
+hist(as.numeric(out[[1]][,n+1]), 100) 
+abline(v= kappa, col = 'red', lwd = 2)
+
+hist(as.numeric(out[[1]][,n+2]), 100 )
+abline(v= lambda, col = 'red', lwd = 2)
+
 plot(as.numeric(out[[1]][,n+1]))
 plot(as.numeric(out[[1]][,n+2]))
-plot(apply(out[[1]], 2, mean)[1:n])
+
+plot(apply(out[[1]], 2, mean)[1:n], cex =.01)
 plot(apply(out[[1]], 2, mean)[1:n], dt$h)
+
+cor(apply(out[[1]], 2, mean)[1:n], dt$h)
 
 abline(0,1, col= 'red')
 gelman.plot(out)
