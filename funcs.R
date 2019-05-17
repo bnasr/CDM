@@ -1,18 +1,97 @@
+library(data.table)
 
+library(boot) # for inverse logit function
 
-simulate_temp <- function(doy = 1:365, 
-                          tmin = -10, 
-                          tmax = 35){
+library(R2jags)
+
+simulate_met <- function(doy = 1:365, 
+                          min = -10, 
+                          max = 35, 
+                          phase = 0.5){
   nd <- length(doy)
   
-  temp <- 
+  met <- 
     sin(
       (doy + runif(nd, -20, 20))/365*2*pi*runif(nd, 0.9, 1.05)
       -
-        pi/2*runif(nd, 0.8, 1.2)
+        phase*pi*runif(nd, 0.8, 1.2)
     )*
-    (tmax*runif(nd, 0.8, 1.2) - tmin*runif(nd, 0.8, 1.2))/2 + 
-    (tmax*runif(nd, 0.8, 1.2) + tmin*runif(nd, 0.8, 1.2))/2
+    (max*runif(nd, 0.8, 1.2) - min*runif(nd, 0.8, 1.2))/2 + 
+    (max*runif(nd, 0.8, 1.2) + min*runif(nd, 0.8, 1.2))/2
   
-  temp
+  met
+}
+
+
+# simulate data
+simulate_data <- function(
+  beta = matrix(c(1, 3, 0.5)),  # vector of coefficients
+  sigma = 0.01, #process error
+  n = 50, # number of phenological cycles
+  nd = 100, # number of days in each cycle
+  kappa = -40, # logit control parameters 1
+  lambda = 1 # logit contol parameters 2
+){
+  data = data.table(year = rep(1:n, each = nd), 
+                    day = rep(1:nd, times = n))
+  
+  data[, temp := simulate_met(day, 
+                              phase = 0.75,
+                              min = runif(-5, 0, n = 1), 
+                              max = runif(20, 40, n = 1)), year]
+  
+  data[, solar := simulate_met(day, 
+                               phase = 0.5,
+                               min = runif(100, 200, n = 1), 
+                               max = runif(500, 600, n = 1)), year]
+  
+  data[day==1,h:=0, ]
+  
+  epsilon = rnorm( n = nrow(data), mean = 0, sd = sigma)
+  
+  X = as.matrix(data[,.(1, scale(temp), scale(solar))])
+  
+  dh = exp(X%*%beta) + epsilon
+  
+  dh = X%*%beta 
+  
+  dh[dh<0] <- 0
+  
+  data$dh <- dh
+  
+  data[,h:=cumsum(dh), year]
+  
+  data[,p:=inv.logit(kappa + lambda*h)]
+  
+  data[,onset:=rbinom(n = .N, size = 1, prob = p)]
+  
+  Y = data$onset
+  
+  head_nodes = which(data$day==1)
+  
+  main_nodes = which(data$day!=1)
+  
+  sim <- list(
+    params = list(
+      sigma = sigma,
+      beta = beta
+    ),
+    
+    latents = list(
+      dh = data$dh,
+      h = data$h
+    ),
+    
+    table = data,
+    
+    data = list(
+      X = X, 
+      Y = Y,
+      kappa = kappa,
+      lambda = lambda,
+      np = ncol(X),
+      n = length(Y),
+      main_nodes = main_nodes,
+      head_nodes = head_nodes)
+  )
 }

@@ -2,43 +2,45 @@ model
 {
   
   # development state for head nodes (i.e. start of the driving forces)
-  for (i in HeadNodes)
+  for (i in head_nodes)
   {
     h[i] <- 0
   }
   
   # development state for main nodes (i.e. all nodes except for the head nodes)
-  for (i in MainNodes)
+  for (i in main_nodes)
   {
+    #dh[i-1] ~ dnorm(X[i-1,]%*%beta, inv_sigma2)
+    
     h[i] <- h[i-1] + 
                       max(
                           0,
                           X[i-1,]%*%beta
                           )
   }
+
+  #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision
   
   # observation level
   for(i in 1:n)
   {
     Y[i] ~ dbern(p[i])            ## binary outcome
     
+    Y_pred[i] ~ dbern(p[i])            ## predictions to validate
+    
     logit(p[i]) <- kappa + lambda * h[i] # logit link
   }
 
-  #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision
 
-  
-#  epsilon ~ dnorm(0, tau)
-
-  
-  
   # priors for process error
-  #sigma ~ dunif(0.0099, .0101) # vague prior for sigma
-  #sigma <- 0.01
+  
+  #sigma ~ dunif(0.0099, .0101) # informative prior for sigma
   
   # priors for beta's
   for(i in 1:np){
+  
     beta[i] ~ dnorm(0, 0.001)# vague prior for beta
+    
   }
 
 }
