@@ -5,9 +5,9 @@ library(boot) # for inverse logit function
 library(R2jags)
 
 simulate_met <- function(doy = 1:365, 
-                          min = -10, 
-                          max = 35, 
-                          phase = 0.5){
+                         min = -10, 
+                         max = 35, 
+                         phase = 0.5){
   nd <- length(doy)
   
   met <- 
@@ -25,6 +25,7 @@ simulate_met <- function(doy = 1:365,
 
 # simulate data
 simulate_data <- function(
+  h_max = 100,
   beta = matrix(c(1, 3, 0.5)),  # vector of coefficients
   sigma = 0.01, #process error
   n = 50, # number of phenological cycles
@@ -51,7 +52,7 @@ simulate_data <- function(
   
   X = as.matrix(data[,.(1, scale(temp), scale(solar))])
   
-  dh = exp(X%*%beta) + epsilon
+  # dh = exp(X%*%beta) + epsilon
   
   dh = X%*%beta 
   
@@ -59,7 +60,15 @@ simulate_data <- function(
   
   data$dh <- dh
   
-  data[,h:=cumsum(dh), year]
+  f <- function(dh){
+    h <- dh*0
+    for(i in 2:length(dh))
+      h[i] <- h[i-1] + dh[i-1]*(1 - h[i-1]/h_max)
+    h
+  }
+  
+  data[,h:=f(dh), year]  
+  
   
   data[,p:=inv.logit(kappa + lambda*h)]
   
@@ -74,7 +83,9 @@ simulate_data <- function(
   sim <- list(
     params = list(
       sigma = sigma,
-      beta = beta
+      beta = beta,
+      # lambda = lambda,
+      kappa = kappa
     ),
     
     latents = list(
@@ -87,10 +98,10 @@ simulate_data <- function(
     data = list(
       X = X, 
       Y = Y,
-      kappa = kappa,
-      lambda = lambda,
+      h_max = h_max,
       np = ncol(X),
       n = length(Y),
+      # lambda = 1,
       main_nodes = main_nodes,
       head_nodes = head_nodes)
   )

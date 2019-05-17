@@ -1,5 +1,6 @@
 model
 {
+  lambda <- 1
   
   # development state for head nodes (i.e. start of the driving forces)
   for (i in head_nodes)
@@ -15,11 +16,12 @@ model
     h[i] <- h[i-1] + 
                       max(
                           0,
+                          #dh[i-1]
                           X[i-1,]%*%beta
-                          )
+                          ) 
+                          *(1- h[i-1]/h_max)
   }
 
-  #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision
   
   # observation level
   for(i in 1:n)
@@ -32,9 +34,14 @@ model
   }
 
 
+  kappa ~ dnorm(0, 0.001)T(, 0)
+  
   # priors for process error
   
+  #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision
+
   #sigma ~ dunif(0.0099, .0101) # informative prior for sigma
+  #sigma <- 0.001
   
   # priors for beta's
   for(i in 1:np){
