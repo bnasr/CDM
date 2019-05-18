@@ -36,6 +36,8 @@ model
 
   kappa ~ dnorm(0, 0.001)T(, 0)
   
+  h_max ~ dnorm(0, 0.001)T(0, )
+  
   # priors for process error
   
   #inv_sigma2 <- pow(sigma, -2) ## convert stddev to precision

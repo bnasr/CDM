@@ -26,7 +26,7 @@ simulate_met <- function(doy = 1:365,
 # simulate data
 simulate_data <- function(
   h_max = 100,
-  beta = matrix(c(1, 3, 0.5)),  # vector of coefficients
+  beta = matrix(c(1, 3, -0.5)),  # vector of coefficients
   sigma = 0.01, #process error
   n = 50, # number of phenological cycles
   nd = 100, # number of days in each cycle
@@ -84,6 +84,7 @@ simulate_data <- function(
     params = list(
       sigma = sigma,
       beta = beta,
+      h_max = h_max,
       # lambda = lambda,
       kappa = kappa
     ),
@@ -98,9 +99,9 @@ simulate_data <- function(
     data = list(
       X = X, 
       Y = Y,
-      h_max = h_max,
       np = ncol(X),
       n = length(Y),
+      # h_max = h_max,
       # lambda = 1,
       main_nodes = main_nodes,
       head_nodes = head_nodes)
